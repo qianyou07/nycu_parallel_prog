@@ -45,7 +45,6 @@ void initialize(int numOfBombs);
 pthread_barrier_t barrier;
 vector<vector<int>> truth_map;
 vector<vector<int>> current_map;
-vector<vector<int>> current_map2;
 
 int NUM_THREADS;
 bool changed = true;
@@ -77,7 +76,6 @@ void random_select()
         if (current_map[m][n] == UNKNOWN && truth_map[m][n] != BOMB)
         {
             current_map[m][n] = OPEN;
-            current_map2[m][n] = OPEN;
             break;
         }
     }
@@ -91,12 +89,12 @@ void random_select()
 
 void set_flag(int m, int n, int threadId)
 {
-    current_map2[m][n] = FLAG;
+    current_map[m][n] = FLAG;
 }
 
 void openGrid(int m, int n)
 {
-    current_map2[m][n] = OPEN;
+    current_map[m][n] = OPEN;
 }
 
 bool compare_map()
@@ -177,7 +175,7 @@ void *task(void *arg)
                                 set_flag(detect_row, detect_col, threadId);
                             }
                         }
-                        current_map2[row][col] = FINISH;
+                        current_map[row][col] = FINISH;
                     }
                     else if (flag_num == grid_num)
                     {
@@ -192,7 +190,7 @@ void *task(void *arg)
                                 openGrid(detect_row, detect_col);
                             }
                         }
-                        current_map2[row][col] = FINISH;
+                        current_map[row][col] = FINISH;
                     }
                 }
             }
@@ -206,7 +204,6 @@ void *task(void *arg)
             {
                 for (int col = 0; col < numOfCols; col++)
                 {
-                    current_map[row][col] = current_map2[row][col];
                     if (current_map[row][col] == BOMB)
                         thread_info[threadId].bomb_count++;
                 }
@@ -254,11 +251,9 @@ void initialize(int numOfBombs)
 {
     // initialize current map
     current_map.resize(numOfRows);
-    current_map2.resize(numOfRows);
     for (int i = 0; i < numOfRows; i++)
     {
         current_map[i].resize(numOfCols, UNKNOWN);
-        current_map2[i].resize(numOfCols, UNKNOWN);
     }
 
     // initialize truth map
